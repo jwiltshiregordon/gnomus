@@ -5,6 +5,7 @@ const fileInput = document.querySelector('input[type="file"]');
 const player = document.getElementById('player');
 const generateBtn = document.getElementById('generate');
 const practicePlayer = document.getElementById('practice-player');
+const recordBtn = document.getElementById('record');
 let audioBuffer = null;
 let arrayBuffer = null;
 
@@ -55,6 +56,45 @@ if (fileInput && player) {
 
   ['play', 'pause', 'ended'].forEach(evt => {
     player.addEventListener(evt, logBuffer);
+  });
+}
+
+// Record audio using the microphone
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingStream = null;
+
+if (recordBtn && player) {
+  recordBtn.addEventListener('click', async () => {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      try {
+        recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(recordingStream);
+        recordedChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+          arrayBuffer = await blob.arrayBuffer();
+          player.src = URL.createObjectURL(blob);
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+          if (generateBtn) generateBtn.disabled = false;
+        };
+
+        mediaRecorder.start();
+        recordBtn.textContent = 'Stop Recording';
+      } catch (err) {
+        console.error('Microphone error:', err);
+      }
+    } else if (mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      recordingStream.getTracks().forEach(t => t.stop());
+      recordBtn.textContent = 'Record';
+    }
   });
 }
 
