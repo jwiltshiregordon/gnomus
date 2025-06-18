@@ -1,10 +1,38 @@
 // Initialize audio playback and monitor buffer size
+import { SoundTouch, SimpleFilter, WebAudioBufferSource } from './node_modules/soundtouchjs/dist/soundtouch.js';
+
 const fileInput = document.querySelector('input[type="file"]');
 const player = document.getElementById('player');
 const generateBtn = document.getElementById('generate');
 const practicePlayer = document.getElementById('practice-player');
 let audioBuffer = null;
 let arrayBuffer = null;
+
+async function stretchBuffer(buffer, tempo) {
+  const soundtouch = new SoundTouch();
+  soundtouch.tempo = tempo;
+  const source = new WebAudioBufferSource(buffer);
+  const filter = new SimpleFilter(source, soundtouch);
+  const outL = [];
+  const outR = [];
+  const tmp = new Float32Array(4096 * 2);
+  let frames = 0;
+  while ((frames = filter.extract(tmp, 4096)) > 0) {
+    for (let i = 0; i < frames; i++) {
+      outL.push(tmp[i * 2]);
+      outR.push(tmp[i * 2 + 1]);
+    }
+  }
+  const outLength = outL.length;
+  const result = new AudioBuffer({
+    length: outLength,
+    numberOfChannels: 2,
+    sampleRate: buffer.sampleRate
+  });
+  result.copyToChannel(Float32Array.from(outL), 0);
+  result.copyToChannel(Float32Array.from(outR), 1);
+  return result;
+}
 
 if (fileInput && player) {
   fileInput.addEventListener('change', async (ev) => {
@@ -35,17 +63,30 @@ if (generateBtn && practicePlayer) {
     if (!audioBuffer) return;
     generateBtn.disabled = true;
 
+    const pattern = [1, 2, 1, 2, 1, 2, 1];
+    const segments = [];
+    for (const tempo of pattern) {
+      if (tempo === 1) {
+        segments.push(audioBuffer);
+      } else {
+        segments.push(await stretchBuffer(audioBuffer, tempo));
+      }
+    }
+
+    const totalLength = segments.reduce((sum, b) => sum + b.length, 0);
     const offlineCtx = new OfflineAudioContext(
       audioBuffer.numberOfChannels,
-      audioBuffer.length * 5,
+      totalLength,
       audioBuffer.sampleRate
     );
 
-    for (let i = 0; i < 5; i++) {
+    let offset = 0;
+    for (const buf of segments) {
       const src = offlineCtx.createBufferSource();
-      src.buffer = audioBuffer;
+      src.buffer = buf;
       src.connect(offlineCtx.destination);
-      src.start(i * audioBuffer.duration);
+      src.start(offset / audioBuffer.sampleRate);
+      offset += buf.length;
     }
 
     const rendered = await offlineCtx.startRendering();
