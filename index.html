@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gnomus Practice Tool</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    header {
+      margin-bottom: 2rem;
+    }
+    input[type="file"] {
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Gnomus</h1>
+    <p>Record a short passage to practice</p>
+  </header>
+  <main>
+    <input type="file" accept="audio/*" capture>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
