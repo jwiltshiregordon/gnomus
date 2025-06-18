@@ -63,10 +63,32 @@ if (generateBtn && practicePlayer) {
     if (!audioBuffer) return;
     generateBtn.disabled = true;
 
-    const pattern = [1, 2, 1, 2, 1, 2, 1];
+    // Build a 100-loop practice schedule that gradually increases the
+    // tempo. The playback alternates between a "slow" and "medium"
+    // tempo, adding roughly one BPM after each pair. Five of the
+    // medium loops are swapped out for a double-speed "fast" pass.
+    const totalLoops = 100;
+    const fastSlots = new Set([19, 39, 59, 79, 99]);
+    const increment = 0.01; // ~1 BPM
+    let slowTempo = 1.0;
+    let mediumTempo = 1.3;
+
+    const pattern = [];
+    for (let i = 0; i < totalLoops; i++) {
+      if (i % 2 === 0) {
+        // slow loop
+        pattern.push(slowTempo);
+      } else {
+        // medium loop, occasionally replaced with a fast loop
+        pattern.push(fastSlots.has(i) ? 2.0 : mediumTempo);
+        slowTempo += increment;
+        mediumTempo += increment;
+      }
+    }
+
     const segments = [];
     for (const tempo of pattern) {
-      if (tempo === 1) {
+      if (Math.abs(tempo - 1) < 1e-6) {
         segments.push(audioBuffer);
       } else {
         segments.push(await stretchBuffer(audioBuffer, tempo));
