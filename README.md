@@ -33,6 +33,7 @@ The `soundtouch.js` library is checked into the `vendor` directory so the site
 can be served directly by GitHub Pages without running a build step. Install
 dependencies locally with `npm install` if you want to modify them, but the
 `node_modules` folder is ignored in the repository.
+GitHub Pages is configured to publish the site directly from the `main` branch.
 
 ## Why "Gnomus"?
 
