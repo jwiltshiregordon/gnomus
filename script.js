@@ -1,5 +1,5 @@
 // Initialize audio playback and monitor buffer size
-import { SoundTouch, SimpleFilter, WebAudioBufferSource } from './node_modules/soundtouchjs/dist/soundtouch.js';
+import { SoundTouch, SimpleFilter, WebAudioBufferSource } from './vendor/soundtouch.js';
 
 const fileInput = document.querySelector('input[type="file"]');
 const player = document.getElementById('player');
