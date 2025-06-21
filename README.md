@@ -27,6 +27,13 @@ python3 -m http.server
 
 Then navigate to [http://localhost:8000](http://localhost:8000) in your browser.
 
+## Deploying on GitHub Pages
+
+The `soundtouch.js` library is checked into the `vendor` directory so the site
+can be served directly by GitHub Pages without running a build step. Install
+dependencies locally with `npm install` if you want to modify them, but the
+`node_modules` folder is ignored in the repository.
+
 ## Why "Gnomus"?
 
 The name is a reference to the first movement of Mussorgsky's *Pictures at an Exhibition*. It's short, quick and requires plenty of practice—exactly what this little tool is for!
