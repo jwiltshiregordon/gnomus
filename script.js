@@ -77,7 +77,9 @@ if (recordBtn && player) {
         };
 
         mediaRecorder.onstop = async () => {
-          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+          // Use the actual recording MIME type to maximize browser compatibility
+          const mimeType = recordedChunks[0]?.type || mediaRecorder.mimeType || 'audio/webm';
+          const blob = new Blob(recordedChunks, { type: mimeType });
           arrayBuffer = await blob.arrayBuffer();
           player.src = URL.createObjectURL(blob);
           const ctx = new (window.AudioContext || window.webkitAudioContext)();
